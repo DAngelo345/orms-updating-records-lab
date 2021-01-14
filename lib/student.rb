@@ -1,14 +1,16 @@
+require 'pry'
 require_relative "../config/environment.rb"
 
 # Remember, you can access your database connection anywhere in this class
 #  with DB[:conn]
 class Student
-  attr_reader :id, :name, :grade
+  attr_accessor :id, :name, :grade
 
 def initialize( id = nil, name, grade)
+  @id = id
   @name = name
   @grade = grade
-  @id = id
+ 
  
 end
 
@@ -52,17 +54,16 @@ def self.create(name, grade)
 end 
 
 def self.new_from_db(row)
+  id = row[0]
+  name =  row[1]
+  grade = row[2]
   
-  new_student = self.new
-new_student.id = row[0]
-new_student.name =  row[1]
-new_student.grade = row[2]
-new_student  
+  new_student = self.new(id, name, grade)
+
+  new_student  
 end
 
 def self.find_by_name(name)
-    
-
   sql = <<-SQL
   SELECT *
   FROM students
@@ -75,7 +76,10 @@ DB[:conn].execute(sql, name).map do |row|
 end.first
 end
 
-
+def update
+  sql = "UPDATE students SET name = ?, grade = ? WHERE id = ?"
+  DB[:conn].execute(sql, self.name, self.grade, self.id)
+end
 
 
 end
